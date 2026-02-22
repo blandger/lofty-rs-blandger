@@ -14,6 +14,7 @@ use std::hash::{Hash, Hasher};
 use std::io::Read;
 
 use byteorder::ReadBytesExt;
+use lofty::tag::items::ENGLISH;
 
 // Generic struct for a text frame that has a language
 //
@@ -95,10 +96,16 @@ impl LanguageFrame {
 		let mut bytes = vec![encoding as u8];
 
 		if language.len() != 3 || language.iter().any(|c| !c.is_ascii_alphabetic()) {
-			return Err(Id3v2Error::new(Id3v2ErrorKind::InvalidLanguage(language)).into());
+			// try to get Lang value from WrtieOptions
+			if write_options.preferred_language.is_none() {
+				return Err(Id3v2Error::new(Id3v2ErrorKind::InvalidLanguage(language)).into());
+			} else {
+				bytes.extend(write_options.preferred_language.unwrap_or(ENGLISH));
+			}
+		} else {
+			bytes.extend(language);
 		}
 
-		bytes.extend(language);
 		bytes.extend(
 			encoding
 				.encode(description, true, write_options.lossy_text_encoding)?

@@ -70,9 +70,11 @@ where
 		data.read_exact(&mut value)?;
 
 		let parsed_value = match item_type {
-			0 => ItemValue::Text(utf8_decode(value).map_err(|_| {
-				decode_err!(Ape, "Failed to convert text item into a UTF-8 string")
-			})?),
+			// 0 => ItemValue::Text(utf8_decode(value).map_err(|_| {
+			// 	decode_err!(Ape, "Failed to convert text item into a UTF-8 string")
+			// })?),
+			// That's a little hack to read non-utf8 values from OLD files
+			0 => ItemValue::Text(String::from_utf8_lossy(value.as_slice()).to_string()),
 			1 => ItemValue::Binary(value),
 			2 => ItemValue::Locator(utf8_decode(value).map_err(|_| {
 				decode_err!(Ape, "Failed to convert locator item into a UTF-8 string")

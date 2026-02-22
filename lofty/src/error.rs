@@ -205,7 +205,7 @@ impl Display for Id3v2ErrorKind {
 			),
 			Self::InvalidLanguage(lang) => write!(
 				f,
-				"Invalid frame language found: {lang:?} (expected 3 ascii characters)"
+				"Invalid frame language found: {lang:?} (expected 3 ascii characters), see also: WriteOptions::preferred_language option"
 			),
 		}
 	}

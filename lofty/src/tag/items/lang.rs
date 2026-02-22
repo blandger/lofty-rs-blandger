@@ -14,6 +14,8 @@ pub type Lang = [u8; 3];
 
 /// English language code
 pub const ENGLISH: Lang = *b"eng";
+/// Russian language code
+pub const RUSSIAN: Lang = *b"rus";
 
 /// Unknown/unspecified language
 pub const UNKNOWN_LANGUAGE: [u8; 3] = *b"XXX";

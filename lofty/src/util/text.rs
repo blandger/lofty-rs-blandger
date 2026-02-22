@@ -1,3 +1,4 @@
+//! Text handling
 use crate::error::{ErrorKind, LoftyError, Result};
 use crate::macros::err;
 

@@ -1,3 +1,6 @@
+use lofty::tag::items::ENGLISH;
+use crate::tag::items::Lang;
+
 /// Options to control how Lofty writes to a file
 ///
 /// This acts as a dumping ground for all sorts of format-specific settings. As such, this is best
@@ -11,6 +14,8 @@ pub struct WriteOptions {
 	pub(crate) uppercase_id3v2_chunk: bool,
 	pub(crate) use_id3v23: bool,
 	pub(crate) lossy_text_encoding: bool,
+	/// Set the preferred language (as bytes) that is used for some text tags
+	pub preferred_language: Option<Lang>,
 }
 
 impl WriteOptions {
@@ -36,6 +41,7 @@ impl WriteOptions {
 			uppercase_id3v2_chunk: true,
 			use_id3v23: false,
 			lossy_text_encoding: true,
+			preferred_language: Some(ENGLISH),
 		}
 	}
 
@@ -215,6 +221,24 @@ impl WriteOptions {
 		self.lossy_text_encoding = lossy_text_encoding;
 		*self
 	}
+
+	/// Set the preferred language as bytes
+	/// See codes at: https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use lofty::config::WriteOptions;
+	/// use crate::tag::items::ENGLISH;
+	///
+	/// // Set an ENGLISH
+	/// let options = WriteOptions::new().preferred_language(ENGLISH);
+	/// ```
+	pub fn preferred_language(mut self, language: Option<Lang>) -> Self {
+		self.preferred_language = language;
+		self
+	}
+
 }
 
 impl Default for WriteOptions {
@@ -230,6 +254,7 @@ impl Default for WriteOptions {
 	///     uppercase_id3v2_chunk: true,
 	///     use_id3v23: false,
 	///     lossy_text_encoding: true,
+	///     preferred_language: ENGLISH,
 	/// }
 	/// ```
 	fn default() -> Self {

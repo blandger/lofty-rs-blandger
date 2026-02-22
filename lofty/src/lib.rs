@@ -115,7 +115,7 @@ pub mod probe;
 pub mod properties;
 pub mod resolve;
 pub mod tag;
-mod util;
+pub mod util;
 
 pub mod aac;
 pub mod ape;
