@@ -96,7 +96,7 @@ impl LanguageFrame {
 		let mut bytes = vec![encoding as u8];
 
 		if language.len() != 3 || language.iter().any(|c| !c.is_ascii_alphabetic()) {
-			// try to get Lang value from WrtieOptions
+			// try to get Lang value from WriteOptions
 			if write_options.preferred_language.is_none() {
 				return Err(Id3v2Error::new(Id3v2ErrorKind::InvalidLanguage(language)).into());
 			} else {
