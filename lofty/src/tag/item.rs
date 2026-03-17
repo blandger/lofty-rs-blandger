@@ -149,14 +149,15 @@ gen_map!(
 	"language"                       => Language,
 	"Script"                         => Script,
 	"Lyrics"                         => Lyrics,
-	"UnsynchedLyrics"                => UnsyncLyrics,
+	"UnsyncedLyrics"                 => UnsyncLyrics,
 	"MUSICBRAINZ_TRACKID"            => MusicBrainzRecordingId,
 	"MUSICBRAINZ_RELEASETRACKID"     => MusicBrainzTrackId,
 	"MUSICBRAINZ_ALBUMID"            => MusicBrainzReleaseId,
 	"MUSICBRAINZ_RELEASEGROUPID"     => MusicBrainzReleaseGroupId,
 	"MUSICBRAINZ_ARTISTID"           => MusicBrainzArtistId,
 	"MUSICBRAINZ_ALBUMARTISTID"      => MusicBrainzReleaseArtistId,
-	"MUSICBRAINZ_WORKID"             => MusicBrainzWorkId
+	"MUSICBRAINZ_WORKID"             => MusicBrainzWorkId,
+	"MUSICBRAINZ_ALBUMTYPE"			 => MusicBrainzReleaseType,
 );
 
 gen_map!(
@@ -246,9 +247,9 @@ gen_map!(
 	"COMM"                                  => Comment,
 	"TLAN"                                  => Language,
 	// Since ID3v2 has its own standard for synchronized lyrics (SYLT frame), and it'd be out of scope
-	// to attempt to parse and convert LRC text into one, we can just treat both `Lyrics` and `UnsyncLyrics`
-	// the same and map them to USLT.
-	"USLT"                                  => Lyrics | UnsyncLyrics,
+	// to attempt to parse and convert LRC text into one. So we can't reasonably support `ItemKey::Lyrics`,
+	// with it being overloaded with both synchronized and unsynchronized lyrics.
+	"USLT"                                  => UnsyncLyrics,
 	// Mapping of MusicBrainzRecordingId is implemented as a special case
 	"MusicBrainz Release Track Id"          => MusicBrainzTrackId,
 	"MusicBrainz Album Id"                  => MusicBrainzReleaseId,
@@ -256,7 +257,8 @@ gen_map!(
 	"MusicBrainz Artist Id"                 => MusicBrainzArtistId,
 	"MusicBrainz Album Artist Id"           => MusicBrainzReleaseArtistId,
 	"MusicBrainz Work Id"                   => MusicBrainzWorkId,
-	"MusicBrainz Album Release Country" 	=> ReleaseCountry
+	"MusicBrainz Album Type"				=> MusicBrainzReleaseType,
+	"MusicBrainz Album Release Country" 	=> ReleaseCountry,
 );
 
 gen_map!(
@@ -343,7 +345,8 @@ gen_map!(
 	"----:com.apple.iTunes:MusicBrainz Artist Id"             => MusicBrainzArtistId,
 	"----:com.apple.iTunes:MusicBrainz Album Artist Id"       => MusicBrainzReleaseArtistId,
 	"----:com.apple.iTunes:MusicBrainz Work Id"               => MusicBrainzWorkId,
-	"----:com.apple.iTunes:MusicBrainz Album Release Country" => ReleaseCountry
+	"----:com.apple.iTunes:MusicBrainz Album Type"		  	  => MusicBrainzReleaseType,
+	"----:com.apple.iTunes:MusicBrainz Album Release Country" => ReleaseCountry,
 );
 
 gen_map!(
@@ -456,7 +459,8 @@ gen_map!(
 	"MUSICBRAINZ_RELEASEGROUPID"              => MusicBrainzReleaseGroupId,
 	"MUSICBRAINZ_ARTISTID"                    => MusicBrainzArtistId,
 	"MUSICBRAINZ_ALBUMARTISTID"               => MusicBrainzReleaseArtistId,
-	"MUSICBRAINZ_WORKID"                      => MusicBrainzWorkId
+	"MUSICBRAINZ_WORKID"                      => MusicBrainzWorkId,
+	"RELEASETYPE"							  => MusicBrainzReleaseType,
 );
 
 macro_rules! gen_item_keys {
@@ -738,6 +742,15 @@ gen_item_keys!(
 		/// Reference: <https://picard-docs.musicbrainz.org/en/appendices/tag_mapping.html#musicbrainz-work-id>
 		MusicBrainzWorkId,
 
+		/// MusicBrainz Release Type
+		///
+		/// A description of the MusicBrainz release group type (e.g. `album`, `single`, `ep`, etc.).
+		///
+		/// <https://musicbrainz.org/doc/Release_Group/Type>
+		///
+		/// Reference: <https://picard-docs.musicbrainz.org/en/appendices/tag_mapping.html#id32>
+		MusicBrainzReleaseType,
+
 		///////////////////////////////////////////////////////////////
 
 		// Flags
@@ -820,7 +833,7 @@ gen_item_keys!(
 		///
 		/// ID3v2 is the only format that has a *specified* way of storing synchronized lyrics, and
 		/// with it being a binary frame, it's only supported through [`Id3v2Tag`] via [`SynchronizedTextFrame`].
-		/// Both [`ItemKey::Lyrics`] and [`ItemKey::UnsyncLyrics`] will be stored in a `USLT` frame.
+		/// [`ItemKey::Lyrics`] is **not** supported in ID3v2, you must use [`ItemKey::UnsyncLyrics`].
 		///
 		/// [LRC format]: https://en.wikipedia.org/wiki/LRC_(file_format)
 		/// [`Id3v2Tag`]: crate::id3::v2::Id3v2Tag
@@ -1032,8 +1045,8 @@ mod tests {
 
 	#[test]
 	fn one_to_many() {
-		assert_eq!(ItemKey::Lyrics.map_key(TagType::Id3v2), Some("USLT"));
-		assert_eq!(ItemKey::UnsyncLyrics.map_key(TagType::Id3v2), Some("USLT"));
+		assert_eq!(ItemKey::Publisher.map_key(TagType::Id3v2), Some("TPUB"));
+		assert_eq!(ItemKey::Label.map_key(TagType::Id3v2), Some("TPUB"));
 	}
 
 	#[test]

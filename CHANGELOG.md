@@ -6,10 +6,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.23.3] - 2026-03-14
+
+### Added
+
+- **ItemKey**: `ItemKey::MusicBrainzReleaseType` ([PR](https://github.com/Serial-ATA/lofty-rs/pull/626))
+  - See <https://picard-docs.musicbrainz.org/en/appendices/tag_mapping.html#id32>
+
+### Changed
+
+- **ID3v2**: `ItemKey::Lyrics` is no longer supported ([issue](https://github.com/Serial-ATA/lofty-rs/issues/624)) ([PR](https://github.com/Serial-ATA/lofty-rs/pull/628))
+  - `ItemKey::Lyrics` is often overloaded with synchronized lyrics in [LRC format](https://en.wikipedia.org/wiki/LRC_(file_format)).
+    In other formats, the distinction between `ItemKey::Lyrics` and `ItemKey::UnsyncLyrics` doesn't matter much as they're both
+    text fields. In ID3v2, however, synchronized lyrics are a separate binary frame. To write synchronized lyrics, you'll have to use
+    [`Id3v2Tag`](https://docs.rs/lofty/latest/lofty/id3/v2/struct.Id3v2Tag.html) and [`SynchronizedTextFrame`](https://docs.rs/lofty/latest/lofty/id3/v2/struct.SynchronizedTextFrame.html)
+    directly.
+
 ### Fixed
 
-- **ID3v2**: Don't error on empty UTF-16 descriptions ([issue](https://github.com/Serial-ATA/lofty-rs/issues/613)) ([PR](https://github.com/Serial-ATA/lofty-rs/pull/614))
+- **ID3v2**:
+  - Don't error on empty UTF-16 descriptions ([issue](https://github.com/Serial-ATA/lofty-rs/issues/613)) ([PR](https://github.com/Serial-ATA/lofty-rs/pull/614))
+  - Retain `ItemKey::{AlbumArtists, Barcode, UnsyncLyrics, ReplayGainAlbumGain, ReplayGainAlbumPeak, ReplayGainTrackGain, ReplayGainTrackPeak}`
+    when during generic conversions ([issue](https://github.com/Serial-ATA/lofty-rs/issues/621)) ([PR](https://github.com/Serial-ATA/lofty-rs/pull/623))
 - **Timestamp**: Only enforce valid year in strict mode ([issue](https://github.com/Serial-ATA/lofty-rs/issues/615)) ([PR](https://github.com/Serial-ATA/lofty-rs/pull/616))
+- **OGG Vorbis**: Fixed potential infinite loop while property reading ([issue](https://github.com/Serial-ATA/lofty-rs/issues/620)) ([PR](https://github.com/Serial-ATA/lofty-rs/pull/622))
+- **IFF**: Support chunks with invalid padding ([issue](https://github.com/Serial-ATA/lofty-rs/issues/619)) ([PR](https://github.com/Serial-ATA/lofty-rs/pull/627))
+  - When RIFF/AIFF chunks have an odd length, they should be padded, and the padding is not counted in the chunk size.
+    However, some encoders incorrectly include the padding in the size, which can cause the parser to go out of sync.
+    We no longer assume padding is valid and have additional checks to stay in sync when possible.
 
 ## [0.23.2] - 2026-02-14
 
@@ -1056,7 +1080,8 @@ See [ogg_pager's changelog](ogg_pager/CHANGELOG.md).
 ### Removed
 - `ErrorKind::BadExtension`
 
-[Unreleased]: https://github.com/Serial-ATA/lofty-rs/compare/0.23.2...HEAD
+[Unreleased]: https://github.com/Serial-ATA/lofty-rs/compare/0.23.3...HEAD
+[0.23.3]: https://github.com/Serial-ATA/lofty-rs/compare/0.23.2...0.23.3
 [0.23.2]: https://github.com/Serial-ATA/lofty-rs/compare/0.23.1...0.23.2
 [0.23.1]: https://github.com/Serial-ATA/lofty-rs/compare/0.23.0...0.23.1
 [0.23.0]: https://github.com/Serial-ATA/lofty-rs/compare/0.22.4...0.23.0
